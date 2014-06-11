@@ -91,10 +91,11 @@
 				$arrReturn	= array();
 				$arrItems 	= explode(',',$getItems);
 				foreach($arrItems as $strRequest){
+					$strRequest = trim($strRequest);
 					if((!isset($_REQUEST[$strRequest]) && !$boolAllowEmpty) || (!$boolAllowEmpty && $_REQUEST[$strRequest] === '') ){
 						$this->error_keys = $strRequest;
 					}else{
-						$arrReturn[$strRequest] = $_REQUEST[$strRequest];
+						$arrReturn[$strRequest] = (!empty($_REQUEST[$strRequest]))?$_REQUEST[$strRequest]:false;
 						unset($_REQUEST[$strRequest]);
 					}
 				}
@@ -163,7 +164,7 @@
 //
 //	require_once 'bdJson.php';
 //	class execVoorbeeld extends bdJson {
-//		
+//		'';
 //		public function __construct(){
 //			if($strAction = $this->getAndCheckRequests('a')){
 //				$strAction = strtolower($strAction);
