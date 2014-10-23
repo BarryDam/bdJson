@@ -54,7 +54,7 @@
 				$phpHeader  = 'application/json'
 			;
 		
-		public function __set($name,$value){
+		public function __set($name, $value){
 			if($name == 'error'){
 				$arrDebugBackTrace		= debug_backtrace();
 				$arrErrorBackTrace		= array();
@@ -74,9 +74,31 @@
 		}
 
 		public function __get($getName){
-			if( array_key_exists($getName,$this->arrJSON) ) return $this->arrJSON[$getName];
+			if( array_key_exists($getName, $this->arrJSON) ) return $this->arrJSON[$getName];
 		}
 
+		/**
+		 * 
+		 */
+		public function getRequest(){
+			$arrRequestKeys = func_get_args();
+			$arrReturn		= array();
+			if (! count($arrRequestKeys)) return;
+			foreach($arrRequestKeys as $strKey) {
+				$strKey = trim($strKey); 
+				if(! isset($_REQUEST[$strKey]) ||$_REQUEST[$strKey] == '' ) {
+					$this->error_keys = $strKey;
+				} else {
+					$arrReturn[$strKey] = $_REQUEST[$strKey];
+					unset($_REQUEST[$strKey]);
+				}
+			}
+			if(! empty($this->arrJSON['error_keys'])){
+				$this->error = '<strong>'.implode(',', $this->arrJSON['error_keys']).'</strong> empty or not set!';
+				return false;
+			}
+			return (count($arrReturn)>1) ? $arrReturn : $arrReturn[$strKey] ;
+		}
 
 		/**
 		* 	Check for empty $_REQUEST
@@ -107,44 +129,11 @@
 			}
 		}
 
-		public static function safeForDB($getArrayOrString=false){
-			if($getArrayOrString){
-				if(is_array($getArrayOrString)){
-					foreach($getArrayOrString as $key => $val){
-						$getArrayOrString[$key] =  self::safeForDB_run($val);
-					}
-				}else{
-					$getArrayOrString = self::safeForDB_run($getArrayOrString);
-				}
-			}
-			return $getArrayOrString;
-		}
-		private static function safeForDB_run($getStr=false){
-			$str = (get_magic_quotes_gpc()) ? stripslashes($getStr) : $getStr;
-			$str = mysql_real_escape_string($str);
-			return $str;
-		}
-
-		/**
-		* USED for dbquery if use SELECT it returns the results in a array
-		**/
-		public function dbQuery($getQuery=false){
-			if(!$getQuery) $this->error = 'No Query passed!';
-			if( !$query = mysql_query($getQuery) ){ 
-				$this->query = $getQuery; $this->error = mysql_error(); 
-			}else if(strtoupper(substr($getQuery,0,6))==='SELECT'){
-				$arrReturn = array();
-				while($row = mysql_fetch_assoc($query)){
-					$arrReturn[] = $row;
-				}
-				if(count($arrReturn)) return $arrReturn;
-			}
-		}
-
 		public function __destruct(){
 			if(!$this->nodestruct){
+				$this->deprecated = 'This version of bdJson is deprecated, use bdJson2 instead!';
 				if(!$this->error) $this->success = true;
-				if((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || isset($_REQUEST['forcejson'])) {
+				if(true || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || isset($_REQUEST['forcejson'])) {
 					header('Content-type: '.$this->phpHeader);
 					if(isset($_REQUEST['callback'])) echo $_REQUEST['callback'] ;
 					echo json_encode($this->arrJSON);
@@ -154,51 +143,4 @@
 			}
 		}
 	}	
-?>
-
-<?php
-
-//	/**
-//	* Dit is een voorbeeld.. 
-//	**/
-//
-//	require_once 'bdJson.php';
-//	class execVoorbeeld extends bdJson {
-//		'';
-//		public function __construct(){
-//			if($strAction = $this->getAndCheckRequests('a')){
-//				$strAction = strtolower($strAction);
-//				switch ($strAction) {
-//					case 'test':
-//						$this->execTest();
-//						break;
-//					case 'test2':
-//						$this->execTest2();
-//						break;
-//					default:
-//						$this->error = 'wrong <strong>a</strong> use <strong>?a=test</strong> or <strong>?a=test2</strong>';
-//						break;
-//				}
-//			}
-//		}
-//
-//		private function execTest(){
-//			if($intID = $this->getAndCheckRequests('id')){
-//				if($intID == 1) $this->error = 'DIT IS EEN VOORBEELD ERROR';
-//				//$this->id = self::safeForDB($intID);
-//				$this->id = $intID;
-//			}
-//		}
-//
-//		private function execTest2(){
-//			if($arrRequests = $this->getAndCheckRequests('id,id2')){
-//				$this->requests = $arrRequests;
-//			}
-//		}
-//		
-//	}
-//	/* self execute */
-//		$execVoorbeeld = new execVoorbeeld;
-//	/**/
-
 ?>
