@@ -111,11 +111,13 @@
 			// ajax or direct in browser?
 			if((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || isset($_REQUEST['forcejson'])) {
 				header('Content-type: '.$this->phpHeader);
-				// callback passed by Ajax?
-				if(isset($_REQUEST['callback'])) 
-					echo $_REQUEST['callback'] ;
-				// echo json data
-				echo json_encode($this->arrJSON);
+				// callback passed by Ajax (JSONP)?
+				if(isset($_REQUEST['callback'])) {
+					echo $_REQUEST['callback'].'('.json_encode($this->arrJSON).')' ;
+				} else {
+					// echo json data
+					echo json_encode($this->arrJSON);
+				}
 			}else{
 				// print for debug
 				echo '<pre>'.print_r($this->arrJSON,true).'</pre>';
