@@ -1,7 +1,8 @@
 <?php
 	abstract class bdJson2 {
 		protected 	$arrJSON 	= array(),
-				$phpHeader  = 'application/json';
+					$phpHeader  = 'application/json',
+					$boolDebug	= false;
 
 		public function __set($getKey, $getValue){
 			switch ($getKey) {
@@ -14,7 +15,8 @@
 						$arrErrorBackTrace[] 	= $strFileName.' on line '.$intLine;
 					}
 					$this->arrJSON['error'] 		= $getValue;
-					$this->arrJSON['error_trace'] 	= $arrErrorBackTrace;
+					if ($this->boolDebug)
+						$this->arrJSON['error_trace'] 	= $arrErrorBackTrace;
 					// instantly stop the script
 					exit;
 					break;
