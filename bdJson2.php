@@ -49,6 +49,8 @@
 				$arr = $_POST;
 			if ($getType == 'GET')
 				$arr = $_GET;
+			if ($getType == 'FILES')
+				$arr = $_FILES;
 
 			if (
 				isset($arr[$getStrKey]) && 
@@ -67,6 +69,30 @@
 						: $getType.' param "'.$getStrKey.'" not passsed'
 					);
 			}
+			return false;
+		}
+
+		protected function getFileRequest($getStrKey, $getTargetDirectory, $getBoolRequiredOrErrorMessage = true, $getErrorValue =false)
+		{
+			$filedata = $this->getRequest($getStrKey, $getBoolRequiredOrErrorMessage, $getErrorValue, 'FILES');
+			
+			if(!is_dir($getTargetDirectory))
+				$this->error = "target destination (".$getTargetDirectory.") does not excist";
+
+
+			$filedata['destination'] = $getTargetDirectory.$filedata['name'];
+			$pathinfo = pathinfo($filedata['destination']);
+			$i=1;
+			$filedata['renamed'] = false;
+			while( file_exists($filedata['destination']) )
+			{
+				$filedata['destination'] = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'_('.($i++).').'. $pathinfo['extension'];
+				$filedata['renamed'] = true;
+			}
+
+			$filedata['moved'] = move_uploaded_file($filedata['tmp_name'], $filedata['destination']);
+
+			return $filedata;
 		}
 
 		protected function POST($getStrKey, $getBoolRequiredOrErrorMessage = true, $getErrorValue = false) {
@@ -77,6 +103,9 @@
 		}
 		protected function REQUEST($getStrKey, $getBoolRequiredOrErrorMessage = true, $getErrorValue = false) {
 			return $this->getRequest($getStrKey, $getBoolRequiredOrErrorMessage, $getErrorValue, 'REQUEST');
+		}
+		protected function FILES($getStrKey, $getTargetDirectory, $getBoolRequiredOrErrorMessage = true, $getErrorValue = false) {
+			return $this->getFileRequest($getStrKey, $getTargetDirectory, $getBoolRequiredOrErrorMessage, $getErrorValue);
 		}
 
 		/**
