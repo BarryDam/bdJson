@@ -36,6 +36,28 @@
 		}
 
 		/**
+		 * if you work with bdJson.js
+		 * the action is 
+		 * @return [type] [description]
+		 */
+		protected function getAction()
+		{
+			$action = (isset($_REQUEST['bdJson_Action']))
+				? $_REQUEST['bdJson_Action']
+				: (isset($_REQUEST['a']) ? $_REQUEST['a'] : false );
+			// unset action request
+			if (isset($_REQUEST['bdJson_Action']))
+				unset($_REQUEST['bdJson_Action']);
+			elseif (isset($_REQUEST['a']))
+				unset($_REQUEST['a']);
+			// throw error when no action passed
+			if (! $action)		
+				$this->error = 'Action is not passed';
+			// return action
+			return $action;
+		}
+
+		/**
 		 * get the request value
 		 * @param  string  $getStrKey		the request key $_REQUEST[$getStrKey]
 		 * @param  mixed bool or string 	$getBoolRequiredOrErrorMessage  when boolean > >true trhow error.. when string > throw error and error messages is $getBoolRequiredOrErrorMessage

@@ -60,7 +60,7 @@ bdJson.prototype.post = function(getAction, getData, getSuccessCallback, getErro
 	else if (typeof(getData) != 'object') 
 		getData = {};	
 	// prepare data
-	var data = $.extend({}, this.getDefaultData(), {a : getAction}, getData);
+	var data = $.extend({}, this.getDefaultData(), {bdJson_Action : getAction}, getData);
 	// do the post and exec callback on success
 	$.post(
 		this.getURL(),
