@@ -64,6 +64,12 @@ var bdJson = (function ($, window, undefined) {
 			getData = {};	
 		// prepare data
 		var data = $.extend({}, this.getDefaultData(), {bdJson_Action : getAction}, getData);
+		// POST send booleans as string > so reset them to empty string
+		if (data.length) {
+			for(var i in data)
+				if (! data[i])
+					data[i] = '';
+		}
 		// abort previous ajax request if not already finished or failed
 		if (this.jqXhr)
 			this.jqXhr.abort();
